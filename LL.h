@@ -1,34 +1,40 @@
-#include <cstddef>
+/******************************************************************
+Name: Marlon Alejandro
+NSHE ID: 5002573038
+Section: 1002
+Assignment: 1
+Description: Connect 4 Header
+******************************************************************/
+
+using namespace std; 
 template <typename T>
 class LL 
 {
-    //contents of each node
     struct node 
     {
         T data;
         node* prev;
         node* next;
     };
-    //iterator class to allow access of each node in main
-   public:
+
+public:
+   
     class Iterator 
     {
-       public:
+    public:
         friend class LL;
         Iterator();
         Iterator(node*);
         T operator*() const;
-        Iterator operator++(int);   //i++
-        Iterator operator++();      //++i
-        Iterator operator--(int);   //i--
-        Iterator operator--();      //--i
+        Iterator operator++(int);
+        Iterator operator++();
+        Iterator operator--(int);
+        Iterator operator--();
         bool operator==(const Iterator&) const;
         bool operator!=(const Iterator&) const;
 
-       private:
-        node* current;              //since it is a private member of a nested class
-                                    //the outter class does not have access to this member
-                                    // that is why we signify that the outter class is marked as a friend                                
+    private:
+        node* current;
     };
 
     LL();
@@ -39,154 +45,223 @@ class LL
     void tailInsert(const T&);
     void headRemove();
     bool isEmpty() const;
-    std::size_t size() const;
+    size_t size() const;
     Iterator begin() const;
     Iterator end() const;
 
-   private:
+private:
     node * portal;
 };
 
-//iterator class implementation
 template <typename T>
-LL<T>::Iterator::Iterator() 
-{
-    current= NULL;
+LL<T>::Iterator::Iterator(){
+    current = nullptr; 
 }
 
 template <typename T>
-LL<T>::Iterator::Iterator(node* ptr) 
-{
-    current = ptr;
+LL<T>::Iterator::Iterator(node* ptr) {
+    current = ptr; 
 }
 
 template <typename T>
-T LL<T>::Iterator::operator*() const 
-{
-    return current->data;
+T LL<T>::Iterator::operator*() const {
+    return current->data; 
 }
 
 template <typename T>
-typename LL<T>::Iterator LL<T>::Iterator::operator++(int) 
-{
-    current= current->next;
-    return current;  
+typename LL<T>::Iterator LL<T>::Iterator::operator++(int) {
+   current = current->next; 
+   return current; 
 }
 
 template <typename T>
-typename LL<T>::Iterator LL<T>::Iterator::operator++() 
-{
-    current= current->next;
-    return current->prev; 
+typename LL<T>::Iterator LL<T>::Iterator::operator++(){
+    current = current->next;
+    return current->prev;
 }
 
 template <typename T>
-typename LL<T>::Iterator LL<T>::Iterator::operator--(int) 
-{
-    current= current->prev;
-    return current;           
+typename LL<T>::Iterator LL<T>::Iterator::operator--(int){   
+    current = current->prev; 
+    return current; 
 }
 
 template <typename T>
-typename LL<T>::Iterator LL<T>::Iterator::operator--() 
-{
-    current= current->prev;
-    return current->next;     
+typename LL<T>::Iterator LL<T>::Iterator::operator--() {  
+    current = current->prev; 
+    return current->next; 
 }
 
 template <typename T>
-bool LL<T>::Iterator::operator==(const Iterator& rhs) const 
-{
-    return this->current==rhs->current;
+bool LL<T>::Iterator::operator==(const Iterator& rhs) const {
+    return this->current == rhs.current; 
 }
 
 template <typename T>
-bool LL<T>::Iterator::operator!=(const Iterator& rhs) const 
-{
-   return this->current!=rhs->current;
+bool LL<T>::Iterator::operator!=(const Iterator& rhs) const {
+   return this->current != rhs.current; 
 }
 
-//Linked list class implementation
+
 template <typename T>
 LL<T>::LL() 
-{
-    node* temp= new node();
-    portal->next= portal;
-    portal->prev=portal;
-    // portal->data=NULL;
+{ 
+    portal = new node; 
+    portal->prev = portal; 
+    portal->next = portal;  
 }
 
-//copy constructor
 template <typename T>
-LL<T>::LL(const LL<T>& copy) 
-{
-    this->portal= new node();
-    node* temp= new node()
-    temp->data= copy->portal->data;
-    temp->prev= portal;
-    this->portal=temp;
-    node* currentNode= portal->next;
+LL<T>::LL(const LL<T>& copy) {
+    LL<T>::Iterator temp; 
+    this->portal = new node; 
+    portal->next = portal; 
+    portal->prev = portal; 
+    temp = copy.begin();
 
-    while(currentNode->data!= NULL){
+    while (temp != copy.portal) {   
+        this->tailInsert(temp.current->data);
+        temp++;  
+    }
 
+}
 
+template <typename T>
+const LL<T>& LL<T>::operator=(const LL<T>& rhs) {
+    node* ptr = portal->next; 
+    LL<T>::Iterator rhsCurrent = rhs.begin(); ; 
+    if(ptr != portal){
+        while(portal->next != portal){
+           this->headRemove();           
+        }
+    }
+
+    portal->next = portal;
+    portal->prev = portal;
+
+    while (rhsCurrent != rhs.portal) {     
+        this->tailInsert(rhsCurrent.current->data); 
+        rhsCurrent++;  
+    }
+    
+    return *this; 
+}
+
+template <typename T>
+LL<T>::~LL() {
+    node* temp = portal->next;  
+    while(temp != portal)   
+    {
+        node* next = temp->next; 
+        delete temp; 
+        temp = next;  
+    }
+    delete portal; 
+}
+
+template <typename T>
+void LL<T>::headInsert(const T& item) {
+    node* temp = new node();
+    temp->data = item;
+    if(portal->next == portal) {
+        temp->prev = portal;
+        temp->next = portal; 
+        portal->prev = temp; 
+        portal->next = temp; 
+    }else {
+    
+        node* head_node = portal->next; 
+        head_node->prev = temp; 
+        portal->next = temp;    
+        temp->next = head_node; 
+        temp->prev = portal;    
     }
 }
 
 template <typename T>
-const LL<T>& LL<T>::operator=(const LL<T>& rhs) 
-{
+void LL<T>::tailInsert(const T& item) {
+    node* temp = new node(); 
+    temp->data = item; 
     
-}
-
-//destructor
-template <typename T>
-LL<T>::~LL() 
-{
-    
-}
-
-//head insert
-template <typename T>
-void LL<T>::headInsert(const T& item) 
-{
-
-}
-
-//tail insert
-template <typename T>
-void LL<T>::tailInsert(const T& item) 
-{
-    
+    if(portal->next == portal){ 
+        temp->prev = portal; 
+        temp->next = portal; 
+        portal->prev = temp;
+        portal->next = temp; 
+    }else {   
+        node* prev_node = portal->prev; 
+        portal->prev = temp;    
+        temp->prev = prev_node; 
+        temp->next = portal;    
+        prev_node->next = temp; 
+    }
 }
 
 template <typename T>
-void LL<T>::headRemove()
-{
-    
+void LL<T>::headRemove(){
+    if(!isEmpty()){
+        node* temp = portal->next;   
+        portal->next = temp->next;  
+        temp->next->prev = portal;  
+        temp->prev = nullptr;       
+        temp->next = nullptr;       
+        delete temp;                
+    }
 } 
 
 template <typename T>
-bool LL<T>::isEmpty() const
-{
-    
+bool LL<T>::isEmpty() const{
+
+    return portal->next == portal; 
 }
 
 template <typename T>
-std::size_t LL<T>::size() const
-{
-   
+size_t LL<T>::size() const{
+    size_t count =0;
+    node* temp = portal->next;
+    while (temp != portal){
+        count++;
+        temp = temp->next; 
+    }
+    return count;  
 }
 
 template <typename T>
 typename LL<T>::Iterator LL<T>::begin() const 
 {
-    
+    return Iterator(portal->next);  
 }
 
 template <typename T>
 typename LL<T>::Iterator LL<T>::end() const 
 {
-   
-}
+    return Iterator(portal); 
+}   
 
+// template <typename T>
+// void LL<T>::printLL() const
+// {
+//     std::cout<< this->current << endl;
+//     // //int num = 0; 
+//     // node* temp = portal->next;
+//     // // while(temp!= portal)
+//     // // {
+//     //     //std::cout << temp->data << "->";
+//     //     int size=0;
+//     //     while(size!=7){
+//     //         if(temp==portal){
+//     //             std::cout<<"- ";
+//     //             size++;
+//     //             temp = temp->next;
+//     //             continue;
+//     //         }
+//     //         std:: cout <<""<< temp->data << " ";
+//     //         temp = temp->next;
+//     //         size++;
+//     //     }
+
+//     //     // temp = temp->next;
+//     //     //if(num == 7) break; 
+
+//     // std::cout << std::endl;
+// }
